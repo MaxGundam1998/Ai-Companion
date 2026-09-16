@@ -1,8 +1,10 @@
-from llm import chat, extract_memory
+from llm import chat
 from character import CHARACTER
+from memory_manager import extract_memory
 import memory
 
 
+#Initialize memory
 memory.initialize()
 
 print("Nikki online.")
@@ -10,30 +12,44 @@ print("Use 'goodbye' to exit")
 print()
 
 while True:
+    #Start of input
+    user_input = input("\nYou: ")
     
-    user_input = input("You: ")
-    
+    #Exit prompt
     if user_input.lower() == "goodbye":
         break
     
     if not user_input:
         continue
     
+    #Core Memory
+    new_memory = extract_memory(user_input)
+    
+    if new_memory.strip().upper() != "NONE":
+        memory.save_memory(new_memory)
+    
+    #Recent Conversation History
     history = memory.recent_message(4)
-    memories = memory.get_memories(5)
+    #history = []
+    
+    #Find relevant long-term memories
+    memories = memory.search_memories(user_input, 5)
+    #memories = []
     
     memory_text = "\n".join(memories)
     
     
-    system_prompt = CHARACTER +f"""
-
-    Here are some things you remember about the user:
+    system_prompt = f"""
+    {CHARACTER}
     
+    KNOWN FACTS ABOUT THE USER:
     {memory_text}
     
-    Use these memories naturally when they are relevant.
-    Do not mention that you are reading from a database.
+    The facts above describe the USER, not Nikki.
+    Use them only when they are relevant to the user's current message.
+    Do not mention the memory system or explain that you remembered something.
     """
+    
     
     messages = [
         {
@@ -51,26 +67,17 @@ while True:
     })
     
     try:
+        #Generate Nikki's response
         print("\nNikki: ", end="", flush=True)
         
-        response = chat(messages)
+        response = chat(messages).strip()
         
         print()
-    
+        
         memory.save_message("user", user_input)
         memory.save_message("assistant", response)
         
-        try:
-        
-            new_memory = extract_memory(user_input)
-        
-            if not new_memory.strip().upper().startswith("NONE"):
-                memory.save_memory(new_memory)
-                
-        except Exception as e:
-            print("[Memory check failed]")
-            print("Memory error:", repr(e))
-    
     except Exception as e:
         print("\nNikki had trouble responding.")
         print("Error:", e)
+

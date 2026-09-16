@@ -1,5 +1,18 @@
+# Nikki's local memory/database
 companion.db
-_pycache_/
+*.db
+
+# Python generated files
+__pycache__/
 *.pyc
+
+# Secrets
 .env
-Old llm
+
+# Downloaded sqlite-vec binary
+vec0.so
+
+# Editor/OS files
+.vscode/
+.idea/
+.DS_Store
