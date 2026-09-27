@@ -1,6 +1,7 @@
 # Nikki's local memory/database
 companion.db
 *.db
+nikki_speech.wav
 
 # Python generated files
 __pycache__/
@@ -10,7 +11,10 @@ __pycache__/
 .env
 
 # Downloaded sqlite-vec binary
+piper/
+voices/
 vec0.so
+
 
 # Editor/OS files
 .vscode/

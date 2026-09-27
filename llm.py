@@ -1,11 +1,13 @@
 import requests
 import json
+import re
+import time
 
 URL = "http://localhost:8000/api/chat"
 
 MODEL = "llama3.2:3b"
 
-def chat(messages):
+def do_chat_request(messages):
     payload = {
         "model": MODEL,
         "messages": messages,
@@ -13,7 +15,8 @@ def chat(messages):
         "options": {
             "num_predict": 200,
             "temperature": 0.6,
-            "top_p": 0.85
+            "top_p": 0.85,
+            "stop": ["<|eot_id|>", "<|start_header_id|>"]
             }
         }
     
@@ -59,3 +62,26 @@ def chat(messages):
     
     return full_response
 
+def clean_response(text):
+    for marker in ["<|eot_id|>", "<|start_header_id|>"]:
+        if marker in text:
+            text = text.split(marker)[0]
+            
+    text = re.split(r"\n\(I ", text)[0]
+    
+    return text.strip()
+
+def chat(messages, retries=1):
+    for attempt in range(retries + 1):
+        raw_response = do_chat_request(messages)
+        cleaned = clean_response(raw_response)
+        
+        if cleaned:
+            return cleaned
+        
+        if attempt < retries:
+            print("\n[Retrying...]")
+            time.sleep(1)
+            
+            
+    return cleaned

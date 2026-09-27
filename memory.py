@@ -147,7 +147,10 @@ def search_memories(query, limit=5):
         ).fetchone()
         
         if row:
-            memories.append(row[0])
+            #print(f"MEMORY DISTANCE: {distance:.4f} | {row[0]}")
+            
+            if distance <= 1.10:
+                memories.append(row[0])
             
     conn.close()
     
